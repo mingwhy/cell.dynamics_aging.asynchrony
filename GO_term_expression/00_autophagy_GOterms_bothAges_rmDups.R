@@ -97,10 +97,10 @@ if(!file.exists(output_file)){
     table(sce_naive$age)
     assayNames(sce_naive)<-'counts'
     sce_naive<-logNormCounts(sce_naive, log=FALSE, pseudo.count=1) 
-    assayNames(sce_naive)
-    
+    assayNames(sce_naive)    
   }
   
+
   tc.names=tc.orders
   
   mouse_tcs_TDI.list<-lapply(tc.names,function(tc){
@@ -108,8 +108,7 @@ if(!file.exists(output_file)){
     tmp=sce_naive[,sce_naive$tissue_cell.type==tc] #raw count data
     
     expr.m=assay(tmp,'normcounts')
-    expr.m=expr.m[,tmp$age==pick.age]
-    
+    expr.m=expr.m[,tmp$age==pick.age]    
     n.expr.gene=Matrix::colSums(expr.m>0) 
     expr.m=expr.m[, n.expr.gene>=100] #keep cells which expr>=100 genes
     
@@ -144,7 +143,6 @@ if(!file.exists(output_file)){
 mouse_tcs_TDI=readRDS(output_file)
 summary(mouse_tcs_TDI$ngene) 
 length(unique(mouse_tcs_TDI$GO.id))
-
 
 df.go.score<-mouse_tcs_TDI[,-1] %>% spread(GO.id,score)
 dim(df.go.score); #cell type by go term

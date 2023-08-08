@@ -75,9 +75,6 @@ if(T){
   assayNames(sce_naive)<-'counts'
   sce_naive<-logNormCounts(sce_naive, log=FALSE, pseudo.count=1) #if log, the cell.lib.size range 2~3 orders
   assayNames(sce_naive)
-  
-  #tmp=assay(sce_naive,'normcounts')
-  #unique(colSums(tmp))
 }
 
 ## use average gene expr per cell type to select cell type-specific genes
@@ -128,32 +125,20 @@ for(cut.off.value in cut.offs){
   names(ts.genes)<-colnames(df.expr.per.tc)
   tmp=data.frame(cell.type=names(ts.genes),ngene=sapply(ts.genes,length))
   summary(tmp$ngene)
-  #data.table::fwrite(tmp[order(tmp$ngene),],'ts.gene_per.tc.txt');
-  #tmp=data.table::fread('ts.gene_per.tc.txt')
   
   ## calculate dnds using specific genes per cell type
   tc.names=cell.lifespan$`cell type annotation in TMS`
   mouse_tcs_TDI.list<-lapply(tc.names,function(tc){
-    sce_naive_one=sce_naive[,sce_naive$tissue_cell.type==tc] #raw count data
-    #sce_naive=sce.shared[[tc]]
-    #x=lapply(x,function(i) i[rowData(i)$include_gene,])
-    #sapply(x,dim)
-    #assayNames(sce_naive_one)<-'counts'
-    
-    #out<-lapply(x,function(sce_naive){
-    #  summary(sizeFactors(sce_naive)) #already calculated in 02_gene_meanVar_shareGenes.R
-    #sce_naive <- logNormCounts(sce_naive,log = TRUE)
-    assayNames(sce_naive_one)
+    sce_naive_one=sce_naive[,sce_naive$tissue_cell.type==tc] #raw count data    
     expr.m=assay(sce_naive_one,'normcounts')
-    #expr.m=assay(sce_naive,'logcounts')
     
     overlap.genes=intersect(rownames(expr.m),gene.meta$mgi_symbol)
     overlap.genes=intersect(ts.genes[[tc]],overlap.genes)
     cat(tc,nrow(expr.m),length(overlap.genes),'\n');
     
     expr.m=expr.m[overlap.genes,]
-    n.expr.gene=Matrix::colSums(expr.m>0) #control for the number of expressed genes （https://academic.oup.com/gbe/article/12/4/300/5807614?login=true
-    
+    n.expr.gene=Matrix::colSums(expr.m>0) 
+
     i=match(overlap.genes,gene.meta$mgi_symbol)
     gene.meta.m=gene.meta[i,]
     dim(gene.meta.m);dim(expr.m)
@@ -161,12 +146,7 @@ for(cut.off.value in cut.offs){
     
     expr.m.binary=expr.m;
     expr.m.binary[expr.m.binary>0]=1;
-    #tmp=Matrix::rowSums(expr.m.binary)
-    #tmp=tmp[order(tmp,decreasing = T)]
-    #tmp1=gene.meta.m[gene.meta.m$mgi_symbol %in% names(tmp)[1:20],]
-    #tmp1=tmp1[order(tmp1$omega,decreasing = T),]
     x=gene.meta.m$omega %*% as.matrix(expr.m.binary)
-    #x=gene.meta.m$rnorvegicus_homolog_ds %*% as.matrix(expr.m.binary)
     index.per.cell=x/n.expr.gene;
     
     length(index.per.cell)
@@ -177,12 +157,11 @@ for(cut.off.value in cut.offs){
     cell.meta=as.data.frame(cell.meta)
     return(cell.meta)
   })
-  
-  #mouse_tcs_TDI=purrr::flatten(mouse_tcs_TDI.list)
+
   mouse_tcs_TDI=as.data.frame(Reduce(`rbind`,mouse_tcs_TDI.list))
   head(mouse_tcs_TDI)
-  summary(mouse_tcs_TDI$sizeFactor) #as we use subsampled UMI
-  summary(mouse_tcs_TDI$n_expr_gene) #44 to 4482
+  summary(mouse_tcs_TDI$sizeFactor) 
+  summary(mouse_tcs_TDI$n_expr_gene) 
   
   saveRDS(mouse_tcs_TDI,output.file)
 }

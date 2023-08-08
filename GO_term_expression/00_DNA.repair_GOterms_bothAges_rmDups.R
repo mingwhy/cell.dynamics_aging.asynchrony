@@ -96,7 +96,7 @@ if(!file.exists(output_file)){
     sce_naive=sce[,sce$age %in% c('3m','24m')]
     table(sce_naive$age)
     assayNames(sce_naive)<-'counts'
-    sce_naive<-logNormCounts(sce_naive, log=TRUE, pseudo.count=1.1) 
+    sce_naive<-logNormCounts(sce_naive, log=FALSE, pseudo.count=1) 
     assayNames(sce_naive)
   }
   
@@ -107,7 +107,7 @@ if(!file.exists(output_file)){
     
     tmp=sce_naive[,sce_naive$tissue_cell.type==tc] #raw count data
     
-    expr.m=assay(tmp,'logcounts')
+    expr.m=assay(tmp,'normcounts')
     expr.m=expr.m[,tmp$age==pick.age]
     n.expr.gene=Matrix::colSums(expr.m>0) 
     expr.m=expr.m[, n.expr.gene>=100] #keep cells which expr>=100 genes

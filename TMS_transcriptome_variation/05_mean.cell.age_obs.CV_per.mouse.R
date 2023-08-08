@@ -66,18 +66,13 @@ res<-lapply(keep.cell.types,function(tc){
   df=all.ages[all.ages$age %in% paste0(age.groups,'m'),]
   if(length(unique(df$age))==1){return(NULL)}
   
-  #df=df[df$gene %in% names(which(table(df$gene)==length(age.groups))),] #expr in all age groups
   ngene=length(unique(df$gene))
   df$numeric.age=as.numeric(gsub('m','',df$age))
   
   df$log10_cv2_scran=log10(df$cv2_scran)
   x=df %>% group_by(numeric.age,mouse.id) %>% 
-    #summarise(CV.per.id=median(log10_cv2_scran)) %>% 
-    #summarise(CV=median(CV.per.id)) 
     summarise(CV.per.id=mean(log10_cv2_scran)) %>% 
     summarise(CV=mean(CV.per.id))
-  #x=df %>% group_by(numeric.age) %>% summarise(CV=mean(log10(cv2_scran)))
-  #x=df %>% group_by(numeric.age) %>% summarise(CV=median(log10_cv2_scran))
   x$tc=tc
   x
 })
@@ -107,12 +102,8 @@ res<-lapply(keep.cell.types,function(tc){
   
   df$log10_cv2_scran=log10(df$cv2_scran)
   x=df %>% group_by(numeric.age,mouse.id) %>% 
-    #summarise(CV.per.id=median(log10_cv2_scran)) %>% 
-    #summarise(CV=median(CV.per.id))
     summarise(CV.per.id=mean(log10_cv2_scran)) %>% 
     summarise(CV=mean(CV.per.id))
-  #x=df %>% group_by(numeric.age) %>% summarise(CV=mean(log10(cv2_scran)))
-  #x=df %>% group_by(numeric.age) %>% summarise(CV=median(log10_cv2_scran))
   x$tc=tc
   x
 })
